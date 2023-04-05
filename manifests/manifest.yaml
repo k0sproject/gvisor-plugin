@@ -14,7 +14,7 @@ spec:
     spec:
       initContainers:
         - name: gvisor-installer
-          image: quay.io/k0sproject/k0s-gvisor-plugin:latest
+          image: quay.io/k0sproject/k0s-gvisor-plugin:main
           securityContext:
             privileged: true
           volumeMounts:
