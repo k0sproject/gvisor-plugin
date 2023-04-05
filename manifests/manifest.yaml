@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: gvisor-installer
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      k0s-app: gvisor-installer
+  template:
+    metadata:
+      labels:
+        k0s-app: gvisor-installer
+    spec:
+      initContainers:
+        - name: gvisor-installer
+          image: quay.io/k0sproject/k0s-gvisor-plugin:latest
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: bin
+              mountPath: /var/lib/k0s/bin
+            - name: imports
+              mountPath: /etc/k0s/containerd.d/
+      containers:
+        # We need one dummy container as DaemonSet do not allow to
+        # run pods with restartPolicy other than Always ¯\_(ツ)_/¯
+        - name: dummy
+          image: registry.k8s.io/pause:3.6
+      volumes:
+        - name: bin
+          hostPath:
+            path: /var/lib/k0s/bin
+            type: Directory
+        - name: imports
+          hostPath:
+            path: /etc/k0s/containerd.d/
+            type: Directory
+---
+apiVersion: node.k8s.io/v1beta1
+kind: RuntimeClass
+metadata:
+  name: gvisor
+handler: runsc
